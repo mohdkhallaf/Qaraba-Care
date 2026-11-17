@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qaraba Care | Interactive Pedigree Risk Mapper & AI Counselor Copilot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;600;700&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+      background-color: #0b1120;
+      color: #f1f5f9;
+    }
+    .brand-stone { background-color: #e8e2d8; color: #2d2520; }
+    .bg-card { background-color: #111827; border: 1px solid #1e293b; }
+    .tab-active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+      color: #ffffff;
+      border-color: #14b8a6;
+      box-shadow: 0 4px 15px -3px rgba(20, 184, 166, 0.4);
+    }
+    .pedigree-node {
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .pedigree-node:hover {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 8px rgba(20, 184, 166, 0.5));
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Mandatory Medical Disclaimer & Judge Sandbox Top Bar -->
+  <div class="bg-gradient-to-r from-teal-950 via-slate-900 to-indigo-950 border-b border-teal-500/40 px-4 py-2.5 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full bg-teal-500/20 border border-teal-400 text-teal-300 font-semibold uppercase tracking-wider">
+          <i class="fa-solid fa-user-check mr-1"></i> Interactive Prototype Sandbox
+        </span>
+        <span class="text-slate-300">
+          Guest Mode Active: <strong>Tariq &amp; Laila (Case #QC-884)</strong> | Dynamic Pedigree &amp; AI Copilot Ready
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="px-2.5 py-1 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 font-semibold">
+          <i class="fa-solid fa-scale-balanced mr-1"></i> Educational Risk Stratification — Not a Definitive Medical Diagnosis
+        </span>
+        <a href="pitch_studio.html" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i class="fa-solid fa-video mr-1 text-teal-400"></i> Pitch Studio
+        </a>
+        <a href="https://github.com/mohdkhallaf/Qaraba-Care" target="_blank" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <i class="fa-brands fa-github mr-1"></i> GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Branded Header -->
+  <header class="brand-stone border-b-4 border-[#756156] shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-[#0f766e] flex items-center justify-center text-white text-2xl shadow-md">
+          <i class="fa-solid fa-dna"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#756156]">Future Health Digital Innovation Challenge</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-[#756156] text-white font-semibold">Solo Founder: Meeda</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Qaraba Care <span class="text-[#0f766e] font-normal text-lg md:text-xl">| قرابة كير</span>
+          </h1>
+          <p class="text-xs md:text-sm text-slate-700">Dynamic Family Health History Mapper, Deterministic Kinship Engine &amp; AI Genetic Counselor Copilot</p>
+        </div>
+      </div>
+
+      <!-- Active Case & Privacy Status -->
+      <div class="flex items-center gap-3 bg-white/90 backdrop-blur px-4 py-2.5 rounded-xl border border-stone-300 shadow-sm">
+        <div class="text-right">
+          <div class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Live Couple Evaluation</div>
+          <div id="headerCoupleName" class="text-sm font-bold text-slate-900">Tariq Al-Mansoori &amp; Laila Al-Mansoori</div>
+          <div id="privacyTokenDisplay" class="text-[11px] text-teal-700 font-mono">SHA-256 Token: 0x9f8a...4c21</div>
+        </div>
+        <div id="headerRiskBadge" class="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs uppercase tracking-wider shadow">
+          High Risk (Tier 3)
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Interactive Application -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+    <!-- Real-Time Mathematical Telemetry Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-card rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Wright's Relationship (R)</p>
+          <p id="metricR" class="text-2xl font-extrabold text-teal-400 mt-1">0.1250 <span class="text-xs font-normal text-slate-400">(12.5%)</span></p>
+          <p id="metricRelLabel" class="text-xs text-slate-400 mt-0.5">First Cousins (1st Degree)</p>
+        </div>
+        <div class="w-11 h-11 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 text-lg">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Offspring Inbreeding (F)</p>
+          <p id="metricF" class="text-2xl font-extrabold text-amber-400 mt-1">0.0625 <span class="text-xs font-normal text-slate-400">(1/16)</span></p>
+          <p class="text-xs text-slate-400 mt-0.5">Identity-by-Descent (IBD)</p>
+        </div>
+        <div class="w-11 h-11 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">
+          <i class="fa-solid fa-square-root-variable"></i>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Inherited Offspring Risk</p>
+          <p id="metricRisk" class="text-2xl font-extrabold text-rose-400 mt-1">25.00%</p>
+          <p id="metricGeneLabel" class="text-xs text-slate-400 mt-0.5">Primary: HBB (Beta-Thalassemia)</p>
+        </div>
+        <div class="w-11 h-11 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-lg">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-xl p-4 flex items-center justify-between">
+        <div>
+          <p class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Counselor Copilot &amp; Referral</p>
+          <p id="metricCopilotStatus" class="text-2xl font-extrabold text-emerald-400 mt-1">Ready</p>
+          <p class="text-xs text-slate-400 mt-0.5">Bilingual Plain-Language Engine</p>
+        </div>
+        <div class="w-11 h-11 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4-Stage Navigation Tabs -->
+    <nav class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <button onclick="switchStage(1)" id="tabBtn1" class="tab-active text-left p-3.5 rounded-xl border border-slate-700 transition flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-slate-900/40 flex items-center justify-center font-bold text-sm">1</span>
+        <div>
+          <div class="text-xs uppercase tracking-wider opacity-80">Stage 1</div>
+          <div class="font-bold text-sm">Couple &amp; Family History Mapper</div>
+        </div>
+      </button>
+
+      <button onclick="switchStage(2)" id="tabBtn2" class="bg-card hover:border-teal-500/50 text-left p-3.5 rounded-xl border border-slate-800 transition flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-sm text-teal-400">2</span>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-slate-400">Stage 2</div>
+          <div class="font-bold text-sm">Interactive Pedigree Tree &amp; Math</div>
+        </div>
+      </button>
+
+      <button onclick="switchStage(3)" id="tabBtn3" class="bg-card hover:border-teal-500/50 text-left p-3.5 rounded-xl border border-slate-800 transition flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-sm text-teal-400">3</span>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-slate-400">Stage 3</div>
+          <div class="font-bold text-sm">Multi-Gene Carrier Matrix</div>
+        </div>
+      </button>
+
+      <button onclick="switchStage(4)" id="tabBtn4" class="bg-card hover:border-teal-500/50 text-left p-3.5 rounded-xl border border-slate-800 transition flex items-center gap-3">
+        <span class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-sm text-teal-400">4</span>
+        <div>
+          <div class="text-xs uppercase tracking-wider text-slate-400">Stage 4</div>
+          <div class="font-bold text-sm">AI Counselor Copilot &amp; Referral</div>
+        </div>
+      </button>
+    </nav>
+
+    <!-- STAGE 1: DYNAMIC COUPLE & FAMILY HEALTH HISTORY MAPPER -->
+    <section id="stage1" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-card rounded-2xl p-6 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Stage 1 • Dynamic Couple &amp; Family Health History Intake</span>
+            <h2 class="text-xl font-bold mt-0.5">Real-Time Kinship, Phenotype &amp; Carrier Input Mapper</h2>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="loadPresetScenario('double_first')" class="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-semibold transition">
+              Load Double Cousins
+            </button>
+            <button onclick="loadPresetScenario('sma_hidden')" class="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-semibold transition">
+              Load Silent SMA Case
+            </button>
+            <button onclick="loadPresetScenario('unrelated')" class="px-2.5 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold transition">
+              Load Unrelated
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Partner A -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase text-sky-400"><i class="fa-solid fa-mars mr-1"></i> Partner A (Proband Male)</span>
+              <span class="text-[11px] font-mono text-slate-400">FHIR Patient/P-101</span>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Full Name (الاسم الكامل)</label>
+              <input id="inputMaleName" type="text" value="Tariq Al-Mansoori" oninput="syncAll()" class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm text-white focus:border-teal-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Partner A Carrier Screening Status</label>
+              <select id="maleCarrierSelect" onchange="syncAll()" class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm text-white">
+                <option value="confirmed" selected>Confirmed Heterozygous Carrier (Lab Sequenced)</option>
+                <option value="unknown">Unscreened (Calculate Bayesian Prior + Family History)</option>
+                <option value="negative">Tested Negative (High-Depth NGS Panel)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Partner B -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase text-pink-400"><i class="fa-solid fa-venus mr-1"></i> Partner B (Proband Female)</span>
+              <span class="text-[11px] font-mono text-slate-400">FHIR Patient/P-102</span>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Full Name (الاسم الكامل)</label>
+              <input id="inputFemaleName" type="text" value="Laila Al-Mansoori" oninput="syncAll()" class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm text-white focus:border-teal-400 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Partner B Carrier Screening Status</label>
+              <select id="femaleCarrierSelect" onchange="syncAll()" class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-sm text-white">
+                <option value="confirmed" selected>Confirmed Heterozygous Carrier (Shared Allele)</option>
+                <option value="unknown">Unscreened (Compute Identity-by-Descent Risk)</option>
+                <option value="negative">Tested Negative (High-Depth NGS Panel)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consanguinity Topology Selector + Custom Ancestral Loop Builder -->
+        <div class="p-4 rounded-xl bg-teal-950/30 border border-teal-500/30 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label class="block text-xs font-bold uppercase tracking-wider text-teal-300">
+              <i class="fa-solid fa-sitemap mr-1"></i> Biological Kinship Topology (درجة القرابة العائلية)
+            </label>
+            <label class="flex items-center gap-2 text-xs text-amber-300 cursor-pointer">
+              <input type="checkbox" id="extraLoopCheck" onchange="syncAll()" class="accent-amber-400 rounded" />
+              <span>+ Add Secondary Ancestral Loop (F<sub>A</sub> = 0.0625)</span>
+            </label>
+          </div>
+          <select id="relationshipSelect" onchange="syncAll()" class="w-full px-3.5 py-2.5 rounded-lg bg-slate-950 border border-teal-500/50 text-sm font-medium text-white focus:outline-none">
+            <option value="double_first">Double First Cousins — أبناء عم وخال مشتركين (4 Shared Founders | R = 0.2500, F = 0.1250)</option>
+            <option value="first_cousin" selected>First Cousins — أبناء عم / خال (2 Shared Grandparents | R = 0.1250, F = 0.0625)</option>
+            <option value="first_once_removed">First Cousins Once Removed (Unequal Generations n₁=2, n₂=3 | R = 0.0625, F = 0.03125)</option>
+            <option value="second_cousin">Second Cousins — أبناء عمومة من الدرجة الثانية (2 Shared Great-Grandparents | R = 0.03125, F = 0.0156)</option>
+            <option value="distant_tribal">Same Tribe / Distant Founder Loop (n₁=4, n₂=4 | R = 0.0078, F = 0.0039)</option>
+            <option value="unrelated">Unrelated — غير أقارب (Non-Consanguineous Baseline | R = 0.0000, F = 0.0000)</option>
+          </select>
+        </div>
+
+        <!-- Interactive Family Health History Phenotype Checkboxes (HPO Terms) -->
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">
+              <i class="fa-solid fa-notes-medical mr-1"></i> Interactive Family Health History Mapper (HPO Phenotype Flags)
+            </span>
+            <span class="text-[11px] text-slate-400">Dynamically adjusts Bayesian pre-test carrier risk &amp; AI Copilot advice</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <input type="checkbox" id="fhAnemia" checked onchange="syncAll()" class="accent-teal-500" />
+              <span><strong>HP:0001903</strong> — Relative with Severe Childhood Anemia / Transfusions (<em>HBB</em>)</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <input type="checkbox" id="fhHypotonia" onchange="syncAll()" class="accent-teal-500" />
+              <span><strong>HP:0001252</strong> — Cousin/Sibling with Infantile Muscle Weakness (<em>SMN1</em> SMA)</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <input type="checkbox" id="fhHearing" onchange="syncAll()" class="accent-teal-500" />
+              <span><strong>HP:0000365</strong> — Congenital Sensorineural Hearing Loss in Extended Family (<em>GJB2</em>)</span>
+            </label>
+            <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <input type="checkbox" id="fhMetabolic" onchange="syncAll()" class="accent-teal-500" />
+              <span><strong>HP:0002153</strong> — Unexplained Neonatal Loss / Metabolic Crisis (<em>CFTR / PAH</em>)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button onclick="switchStage(2)" class="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition shadow-lg">
+            Inspect Interactive Pedigree Tree &amp; Math <i class="fa-solid fa-arrow-right ml-1.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Zero-Trust Privacy & Consent Vault -->
+      <div class="bg-card rounded-2xl p-6 flex flex-col justify-between space-y-4">
+        <div class="space-y-2">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400"><i class="fa-solid fa-lock mr-1"></i> Privacy &amp; Consent Safeguards</span>
+          <h3 class="text-lg font-bold">Zero-Trust Genomic &amp; Family Vault</h3>
+          <p class="text-xs text-slate-400">
+            Family pedigrees contain sensitive information about multiple relatives. Toggle the privacy controls below to see how Qaraba Care isolates PII before computing risk:
+          </p>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer">
+            <div>
+              <div class="font-bold text-slate-200">Pseudonymize Names (SHA-256)</div>
+              <div class="text-[11px] text-slate-400">Mask PII in pedigree &amp; FHIR bundle</div>
+            </div>
+            <input type="checkbox" id="togglePseudonym" onchange="syncAll()" class="w-4 h-4 accent-teal-500" />
+          </label>
+
+          <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer">
+            <div>
+              <div class="font-bold text-slate-200">Compartmented Branch Lock</div>
+              <div class="text-[11px] text-slate-400">Require mutual partner consent</div>
+            </div>
+            <input type="checkbox" id="toggleConsentLock" checked onchange="syncAll()" class="w-4 h-4 accent-teal-500" />
+          </label>
+
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5 font-mono text-[11px]">
+            <div class="text-slate-400"> Data Residency: <span class="text-teal-300">Azure UAE North</span></div>
+            <div class="text-slate-400"> Compliance: <span class="text-emerald-300">ADHICS v2 &amp; UAE PDPL</span></div>
+            <div class="text-slate-400"> SaMD Scope: <span class="text-amber-300">Educational CDS</span></div>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs text-amber-200 space-y-1">
+          <div class="font-bold"><i class="fa-solid fa-circle-info mr-1"></i> Clinical Boundary Safeguard</div>
+          <p class="text-amber-200/80">
+            This platform provides <strong>educational pre-test and post-test risk stratification</strong>. Definitive diagnosis requires accredited molecular sequencing and consultation with a certified genetic counselor.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 2: INTERACTIVE PEDIGREE TREE & SEWALL WRIGHT MATH -->
+    <section id="stage2" class="hidden grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-card rounded-2xl p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Stage 2 • Interactive Family Tree &amp; Carrier Click-to-Toggle</span>
+            <h2 class="text-xl font-bold">Click Any Family Node Below to Toggle Carrier / Phenotype Status</h2>
+          </div>
+          <span id="lcaBadge" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-semibold">
+            2 Lowest Common Ancestors (LCAs)
+          </span>
+        </div>
+
+        <!-- Interactive SVG Pedigree Canvas -->
+        <div class="w-full bg-slate-950 rounded-xl border border-slate-800 p-4 overflow-x-auto">
+          <svg id="pedigreeSvg" viewBox="0 0 760 350" class="w-full h-auto min-w-[600px]">
+            <!-- Legend -->
+            <g transform="translate(15, 15)">
+              <rect width="14" height="14" fill="#0ea5e9" rx="2"></rect>
+              <text x="20" y="11" fill="#94a3b8" font-size="11">Male</text>
+              <circle cx="72" cy="7" r="7" fill="#ec4899"></circle>
+              <text x="85" y="11" fill="#94a3b8" font-size="11">Female</text>
+              <circle cx="145" cy="7" r="5" fill="#f59e0b"></circle>
+              <text x="156" y="11" fill="#fbbf24" font-size="11">Shared Ancestor / Carrier (Click Node to Toggle)</text>
+            </g>
+
+            <!-- Generation I: Shared Founders -->
+            <g id="gen1Group">
+              <line id="lineFounderMarriage" x1="310" y1="60" x2="450" y2="60" stroke="#f59e0b" stroke-width="3" />
+              <line id="lineFounderDrop" x1="380" y1="60" x2="380" y2="110" stroke="#f59e0b" stroke-width="2.5" />
+              <line id="lineSibSpanner" x1="230" y1="110" x2="530" y2="110" stroke="#f59e0b" stroke-width="2.5" />
+              <line x1="230" y1="110" x2="230" y2="145" stroke="#f59e0b" stroke-width="2.5" />
+              <line x1="530" y1="110" x2="530" y2="145" stroke="#f59e0b" stroke-width="2.5" />
+
+              <!-- Grandfather LCA -->
+              <g class="pedigree-node" onclick="toggleNodeCarrier('gf1')" transform="translate(285, 35)">
+                <rect id="nodeGf1Box" width="50" height="50" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="3" />
+                <circle id="nodeGf1Dot" cx="25" cy="25" r="8" fill="#f59e0b" />
+                <text x="25" y="66" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="bold">Founder GF (LCA)</text>
+              </g>
+
+              <!-- Grandmother LCA -->
+              <g class="pedigree-node" onclick="toggleNodeCarrier('gm1')" transform="translate(425, 35)">
+                <circle id="nodeGm1Box" cx="25" cy="25" r="25" fill="#1e293b" stroke="#f59e0b" stroke-width="3" />
+                <circle id="nodeGm1Dot" cx="25" cy="25" r="8" fill="#f59e0b" />
+                <text x="25" y="66" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="bold">Founder GM (LCA)</text>
+              </g>
+            </g>
+
+            <!-- Generation II: Parents -->
+            <g>
+              <line x1="140" y1="170" x2="230" y2="170" stroke="#64748b" stroke-width="2" />
+              <line x1="185" y1="170" x2="185" y2="255" stroke="#14b8a6" stroke-width="3" stroke-dasharray="5,3" />
+              <line x1="530" y1="170" x2="620" y2="170" stroke="#64748b" stroke-width="2" />
+              <line x1="575" y1="170" x2="575" y2="255" stroke="#14b8a6" stroke-width="3" stroke-dasharray="5,3" />
+
+              <g class="pedigree-node" onclick="toggleNodeCarrier('motherA')" transform="translate(115, 145)">
+                <circle cx="25" cy="25" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="2" />
+                <circle id="nodeMotherADot" cx="25" cy="25" r="0" fill="#f59e0b" />
+                <text x="25" y="62" text-anchor="middle" fill="#94a3b8" font-size="10">Mother A</text>
+              </g>
+
+              <g class="pedigree-node" onclick="toggleNodeCarrier('fatherA')" transform="translate(205, 145)">
+                <rect width="46" height="46" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-width="2.5" />
+                <circle id="nodeFatherADot" cx="23" cy="23" r="7" fill="#f59e0b" />
+                <text x="23" y="62" text-anchor="middle" fill="#e2e8f0" font-size="10" font-weight="bold">Father A</text>
+              </g>
+
+              <g class="pedigree-node" onclick="toggleNodeCarrier('fatherB')" transform="translate(507, 145)">
+                <rect width="46" height="46" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-width="2.5" />
+                <circle id="nodeFatherBDot" cx="23" cy="23" r="7" fill="#f59e0b" />
+                <text x="23" y="62" text-anchor="middle" fill="#e2e8f0" font-size="10" font-weight="bold">Father B</text>
+              </g>
+
+              <g class="pedigree-node" onclick="toggleNodeCarrier('motherB')" transform="translate(595, 145)">
+                <circle cx="25" cy="25" r="22" fill="#1e293b" stroke="#ec4899" stroke-width="2" />
+                <circle id="nodeMotherBDot" cx="25" cy="25" r="0" fill="#f59e0b" />
+                <text x="25" y="62" text-anchor="middle" fill="#94a3b8" font-size="10">Mother B</text>
+              </g>
+            </g>
+
+            <!-- Generation III: Proband Couple -->
+            <g>
+              <line id="consangLine1" x1="210" y1="276" x2="550" y2="276" stroke="#f43f5e" stroke-width="3" />
+              <line id="consangLine2" x1="210" y1="283" x2="550" y2="283" stroke="#f43f5e" stroke-width="3" />
+
+              <g class="pedigree-node" onclick="toggleProbandCarrier('male')" transform="translate(160, 255)">
+                <rect width="50" height="50" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="3" />
+                <circle id="probandMaleDot" cx="25" cy="25" r="9" fill="#f43f5e" />
+                <text id="svgMaleName" x="25" y="68" text-anchor="middle" fill="#38bdf8" font-size="12" font-weight="bold">Tariq</text>
+              </g>
+
+              <g class="pedigree-node" onclick="toggleProbandCarrier('female')" transform="translate(550, 255)">
+                <circle cx="25" cy="25" r="25" fill="#0f172a" stroke="#f472b6" stroke-width="3" />
+                <circle id="probandFemaleDot" cx="25" cy="25" r="9" fill="#f43f5e" />
+                <text id="svgFemaleName" x="25" y="68" text-anchor="middle" fill="#f472b6" font-size="12" font-weight="bold">Laila</text>
+              </g>
+
+              <line x1="380" y1="280" x2="380" y2="310" stroke="#f43f5e" stroke-width="2.5" />
+              <polygon points="380,305 396,320 380,335 364,320" fill="#f43f5e" />
+              <text id="svgOffspringRisk" x="408" y="324" fill="#fda4af" font-size="12" font-weight="bold">F = 0.0625 | P(Affected) = 25.00%</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+          <span><i class="fa-solid fa-hand-pointer mr-1 text-teal-400"></i> <strong>Tip for Judges:</strong> Click on <strong>Tariq</strong> or <strong>Laila</strong> in the SVG tree above to toggle their carrier status and watch the math update!</span>
+          <button onclick="switchStage(3)" class="px-4 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold transition">
+            Open Multi-Gene Carrier Matrix <i class="fa-solid fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Sewall Wright Path Math Trace -->
+      <div class="bg-card rounded-2xl p-6 space-y-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Deterministic Graph Engine</span>
+        <h3 class="text-lg font-bold">Sewall Wright Path Equations</h3>
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs space-y-2">
+          <div class="text-teal-300 font-semibold">1. Coefficient of Relationship (R):</div>
+          <div class="text-slate-200 bg-slate-900 p-2 rounded">R = Σ (1/2)<sup>n₁ + n₂</sup> × (1 + F<sub>A</sub>)</div>
+          <div class="text-amber-300 font-semibold pt-1">2. Offspring Inbreeding (F):</div>
+          <div class="text-slate-200 bg-slate-900 p-2 rounded">F = ½ × R</div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2 text-xs">
+          <div class="font-bold text-slate-200 uppercase tracking-wider">Live Step-by-Step Derivation:</div>
+          <div id="mathTraceBox" class="space-y-1.5 text-slate-300 font-mono"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 3: MULTI-GENE CARRIER MATRIX -->
+    <section id="stage3" class="hidden grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-card rounded-2xl p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">Stage 3 • Live Multi-Gene Inherited Risk Matrix</span>
+            <h2 class="text-xl font-bold">MENA Autosomal Recessive Carrier Panel Calculator</h2>
+          </div>
+          <span class="px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/40 text-teal-300 text-xs font-semibold">
+            Click Any Disorder Row to Set Primary Target
+          </span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                <th class="py-3 px-3">Target</th>
+                <th class="py-3 px-3">Gene / Condition</th>
+                <th class="py-3 px-3">MENA Carrier Prior (2pq)</th>
+                <th class="py-3 px-3">History Flag</th>
+                <th class="py-3 px-3">Calculated Offspring Risk</th>
+                <th class="py-3 px-3">Recommended Action</th>
+              </tr>
+            </thead>
+            <tbody id="carrierTableBody" class="divide-y divide-slate-800/70">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="switchStage(4)" class="px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm transition">
+            Launch AI Counselor Copilot &amp; Referral <i class="fa-solid fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Educational vs Diagnostic Distinction Card -->
+      <div class="bg-card rounded-2xl p-6 space-y-4">
+        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Clinical Governance</span>
+        <h3 class="text-lg font-bold">Educational Stratification vs. Definitive Diagnosis</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Qaraba Care clearly separates mathematical pre-test/post-test risk modeling from clinical diagnosis:
+        </p>
+        <div class="space-y-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="font-bold text-teal-300">1. Educational Risk Stratification</div>
+            <p class="text-slate-400 mt-0.5">Combines family topology ($F$) and regional carrier frequencies to prioritize who needs expanded genetic testing.</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="font-bold text-amber-300">2. Accredited Molecular Confirmation</div>
+            <p class="text-slate-400 mt-0.5">All flagged couples are routed for CAP/CLIA-accredited NGS sequencing or MLPA copy-number analysis.</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="font-bold text-emerald-300">3. Certified Genetic Counselor Sign-Off</div>
+            <p class="text-slate-400 mt-0.5">No reproductive intervention (PGT-M / prenatal CVS) occurs without in-person or tele-genetic counseling.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAGE 4: WORKING AI COUNSELOR COPILOT & CERTIFIED REFERRAL PATHWAY -->
+    <section id="stage4" class="hidden grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Left 7 Cols: Interactive AI Counselor Copilot -->
+      <div class="lg:col-span-7 bg-card rounded-2xl p-6 space-y-4 border border-teal-500/40">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-teal-400">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Stage 4 • Working AI Counselor Copilot
+            </span>
+            <h2 class="text-xl font-bold">Plain-Language Risk Explainer &amp; Preconception Planner</h2>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-amber-500/20 border border-amber-400/40 text-amber-300 text-[11px] font-semibold">
+            Educational Decision Aid — Not Medical Advice
+          </span>
+        </div>
+
+        <!-- Interactive Copilot Prompt Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Explanation Literacy Level</label>
+            <select id="copilotToneSelect" onchange="syncAll()" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white">
+              <option value="plain" selected>Empathetic Plain-Language (Couple)</option>
+              <option value="clinical">Technical Clinical Geneticist Note</option>
+              <option value="family">Extended Family Cascade Summary</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">Preconception Focus</label>
+            <select id="copilotFocusSelect" onchange="syncAll()" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white">
+              <option value="pgtm" selected>IVF with PGT-M Embryo Selection</option>
+              <option value="ngs">Targeted Confirmatory NGS / MLPA</option>
+              <option value="prenatal">Early Prenatal Diagnostic Planning</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="askCopilotCustomQuestion()" class="w-full px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs transition">
+              <i class="fa-solid fa-rotate mr-1"></i> Synthesize New Explanation
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Couple Q&A Prompt Bar -->
+        <div class="flex gap-2">
+          <input id="customCopilotQuestion" type="text" placeholder="Ask the AI Copilot a question (e.g., 'What does 25% recessive risk mean for our future children?')" class="flex-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white focus:border-teal-400 focus:outline-none" />
+          <button onclick="answerCustomQuestion()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-teal-500/40 text-teal-300 font-semibold text-xs transition">
+            Ask Copilot
+          </button>
+        </div>
+
+        <!-- English Copilot Narrative Output -->
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2 text-xs leading-relaxed">
+          <div class="font-bold text-teal-300 uppercase tracking-wider">English Plain-Language Explanation &amp; Preconception Steps:</div>
+          <div id="aiOutputEnglish" class="text-slate-200 space-y-2"></div>
+        </div>
+
+        <!-- Arabic Copilot Narrative Output -->
+        <div dir="rtl" class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2 text-xs leading-relaxed font-sans">
+          <div class="font-bold text-amber-300">الشرح المبسط باللغة العربية وخطوات التخطيط الإنجابي الآمن:</div>
+          <div id="aiOutputArabic" class="text-slate-200 space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- Right 5 Cols: Certified Genetic Counselor Referral Directory & FHIR Bundle -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">
+                <i class="fa-solid fa-hospital-user mr-1"></i> Qualified Healthcare Professional Referral
+              </span>
+              <h3 class="text-lg font-bold">Connect with a Certified Genetic Counselor</h3>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-400">
+            Select an accredited genetics center below to transmit your encrypted HL7 FHIR pedigree and carrier risk packet for a formal medical consultation:
+          </p>
+
+          <div class="space-y-2.5 text-xs">
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <div>
+                <div class="font-bold text-white">Sheikh Shakhbout Medical City (SSMC) — Abu Dhabi</div>
+                <div class="text-slate-400">Medical Genetics &amp; Premarital Counseling • Malaffi Connected</div>
+              </div>
+              <input type="radio" name="clinicReferral" value="SSMC Abu Dhabi Genetics Clinic" checked class="accent-teal-500" />
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <div>
+                <div class="font-bold text-white">Cleveland Clinic Abu Dhabi / M42 Genomics</div>
+                <div class="text-slate-400">Reproductive Genetics &amp; PGT-M Board • DoH Licensed</div>
+              </div>
+              <input type="radio" name="clinicReferral" value="Cleveland Clinic Abu Dhabi / M42 Genomics" class="accent-teal-500" />
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-teal-500/40 cursor-pointer">
+              <div>
+                <div class="font-bold text-white">Al Jalila Children's / Dubai Health Genomics</div>
+                <div class="text-slate-400">Certified Board Genetic Counselors • NABIDH Connected</div>
+              </div>
+              <input type="radio" name="clinicReferral" value="Al Jalila Genomics Center Dubai" class="accent-teal-500" />
+            </label>
+          </div>
+
+          <button onclick="bookCounselorReferral()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg">
+            <i class="fa-solid fa-paper-plane mr-1"></i> Generate Encrypted Referral Packet &amp; Book Consultation
+          </button>
+
+          <div id="referralConfirmationBox" class="hidden p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs text-emerald-200 space-y-1">
+            <!-- Populated dynamically on click -->
+          </div>
+        </div>
+
+        <!-- Live HL7 FHIR R4 Bundle -->
+        <div class="bg-card rounded-2xl p-6 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">HL7 FHIR R4 Bundle (Live Sync)</span>
+            <button onclick="copyFhirJson()" id="copyBtn" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs text-teal-300 border border-slate-700">
+              <i class="fa-regular fa-copy mr-1"></i> Copy FHIR JSON
+            </button>
+          </div>
+          <pre id="fhirJsonBox" class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-emerald-300 font-mono overflow-x-auto max-h-48"></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-950/80 py-4 px-4 mt-8 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <strong>Qaraba Care</strong> • Solo Founder &amp; Architect: <strong>Meeda</strong> | Educational Risk Stratification Platform (Requires Certified Genetic Counselor Review)
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="pitch_studio.html" class="hover:text-teal-400 transition">Pitch Studio</a>
+        <a href="https://github.com/mohdkhallaf/Qaraba-Care" target="_blank" class="hover:text-teal-400 transition">GitHub Repository</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const disorders = [
+      { id: "HBB", name: "HBB (Beta-Thalassemia Major)", omim: "#603903", freq: 0.045, fhCheckbox: "fhAnemia", action: "HBB Sequencing + PGT-M Counseling" },
+      { id: "SMN1", name: "SMN1 (Spinal Muscular Atrophy - SMA)", omim: "#253300", freq: 0.025, fhCheckbox: "fhHypotonia", action: "MLPA Exon 7/8 Copy-Number Assay" },
+      { id: "GJB2", name: "GJB2 (Nonsyndromic Hearing Loss)", omim: "#220290", freq: 0.032, fhCheckbox: "fhHearing", action: "Targeted GJB2 Sequencing Panel" },
+      { id: "CFTR", name: "CFTR / PAH (Cystic Fibrosis & Metabolic)", omim: "#219700", freq: 0.018, fhCheckbox: "fhMetabolic", action: "Expanded MENA Carrier NGS Panel" }
+    ];
+
+    let activeDisorderIndex = 0;
+    let nodeCarrierState = { gf1: true, gm1: true, fatherA: true, motherA: false, fatherB: true, motherB: false };
+
+    const relationshipPresets = {
+      double_first: { label: "Double First Cousins", r: 0.2500, f: 0.1250, lca: "4 Shared Ancestral Founders", n1: 2, n2: 2, paths: 4 },
+      first_cousin: { label: "First Cousins", r: 0.1250, f: 0.0625, lca: "2 Shared Grandparent Founders", n1: 2, n2: 2, paths: 2 },
+      first_once_removed: { label: "First Cousins Once Removed", r: 0.0625, f: 0.03125, lca: "2 Shared Founders (n₁=2, n₂=3)", n1: 2, n2: 3, paths: 2 },
+      second_cousin: { label: "Second Cousins", r: 0.03125, f: 0.015625, lca: "2 Great-Grandparent Founders", n1: 3, n2: 3, paths: 2 },
+      distant_tribal: { label: "Distant Tribal Kinship", r: 0.00781, f: 0.0039, lca: "Distant Founder Loop (n₁=4, n₂=4)", n1: 4, n2: 4, paths: 2 },
+      unrelated: { label: "Unrelated (Non-Consanguineous)", r: 0.0000, f: 0.0000, lca: "0 Shared Ancestors within 4 Generations", n1: 0, n2: 0, paths: 0 }
+    };
+
+    function switchStage(stageNum) {
+      for (let i = 1; i <= 4; i++) {
+        const sec = document.getElementById("stage" + i);
+        const btn = document.getElementById("tabBtn" + i);
+        if (i === stageNum) {
+          sec.classList.remove("hidden");
+          sec.classList.add("grid");
+          btn.classList.add("tab-active");
+          btn.classList.remove("bg-card");
+        } else {
+          sec.classList.add("hidden");
+          sec.classList.remove("grid");
+          btn.classList.remove("tab-active");
+          btn.classList.add("bg-card");
+        }
+      }
+      syncAll();
+    }
+
+    function loadPresetScenario(presetType) {
+      if (presetType === "double_first") {
+        document.getElementById("relationshipSelect").value = "double_first";
+        document.getElementById("maleCarrierSelect").value = "confirmed";
+        document.getElementById("femaleCarrierSelect").value = "confirmed";
+        document.getElementById("fhAnemia").checked = true;
+        activeDisorderIndex = 0;
+      } else if (presetType === "sma_hidden") {
+        document.getElementById("relationshipSelect").value = "first_cousin";
+        document.getElementById("maleCarrierSelect").value = "unknown";
+        document.getElementById("femaleCarrierSelect").value = "unknown";
+        document.getElementById("fhHypotonia").checked = true;
+        activeDisorderIndex = 1;
+      } else {
+        document.getElementById("relationshipSelect").value = "unrelated";
+        document.getElementById("maleCarrierSelect").value = "unknown";
+        document.getElementById("femaleCarrierSelect").value = "unknown";
+        document.getElementById("fhAnemia").checked = false;
+        document.getElementById("fhHypotonia").checked = false;
+      }
+      syncAll();
+    }
+
+    function toggleNodeCarrier(nodeKey) {
+      nodeCarrierState[nodeKey] = !nodeCarrierState[nodeKey];
+      const dotMap = {
+        gf1: "nodeGf1Dot",
+        gm1: "nodeGm1Dot",
+        fatherA: "nodeFatherADot",
+        motherA: "nodeMotherADot",
+        fatherB: "nodeFatherBDot",
+        motherB: "nodeMotherBDot"
+      };
+      const el = document.getElementById(dotMap[nodeKey]);
+      if (el) {
+        el.setAttribute("r", nodeCarrierState[nodeKey] ? "7" : "0");
+      }
+      syncAll();
+    }
+
+    function toggleProbandCarrier(partner) {
+      const sel = document.getElementById(partner === "male" ? "maleCarrierSelect" : "femaleCarrierSelect");
+      sel.value = sel.value === "confirmed" ? "unknown" : "confirmed";
+      syncAll();
+    }
+
+    function computeGeneRisk(disorder, rVal, fVal, maleStatus, femaleStatus) {
+      const fhPositive = document.getElementById(disorder.fhCheckbox).checked;
+      const effectivePrior = fhPositive ? Math.min(0.25, disorder.freq * 2.5) : disorder.freq;
+
+      if (maleStatus === "negative" && femaleStatus === "negative") {
+        return 0.00005;
+      }
+      if (maleStatus === "confirmed" && femaleStatus === "confirmed") {
+        return 0.25;
+      }
+      if (maleStatus === "confirmed" || femaleStatus === "confirmed") {
+        if (maleStatus === "negative" || femaleStatus === "negative") {
+          return 0.25 * (effectivePrior * 0.02);
+        }
+        const partnerCarrierProb = Math.min(0.95, rVal + (1 - rVal) * effectivePrior);
+        return 0.25 * partnerCarrierProb;
+      }
+      // Both unscreened: use Wright's F + family history boost
+      const q = effectivePrior / 2;
+      const baseRisk = (q * q) * (1 - fVal) + q * fVal;
+      return fhPositive ? Math.min(0.25, baseRisk * 3.2 + 0.03125 * rVal) : baseRisk;
+    }
+
+    function syncAll() {
+      const pseudonymize = document.getElementById("togglePseudonym").checked;
+      const rawMale = document.getElementById("inputMaleName").value || "Tariq Al-Mansoori";
+      const rawFemale = document.getElementById("inputFemaleName").value || "Laila Al-Mansoori";
+      const maleName = pseudonymize ? "PROBAND-M-884A" : rawMale;
+      const femaleName = pseudonymize ? "PROBAND-F-884B" : rawFemale;
+
+      const relKey = document.getElementById("relationshipSelect").value;
+      const extraLoop = document.getElementById("extraLoopCheck").checked;
+      const maleStatus = document.getElementById("maleCarrierSelect").value;
+      const femaleStatus = document.getElementById("femaleCarrierSelect").value;
+
+      const basePreset = relationshipPresets[relKey];
+      const fa = extraLoop && basePreset.paths > 0 ? 0.0625 : 0.0;
+      const rVal = basePreset.paths > 0 ? basePreset.r * (1 + fa) : 0.0;
+      const fVal = rVal / 2.0;
+
+      // Update SVG Proband Dots
+      document.getElementById("probandMaleDot").setAttribute("r", maleStatus === "confirmed" ? "9" : "0");
+      document.getElementById("probandFemaleDot").setAttribute("r", femaleStatus === "confirmed" ? "9" : "0");
+
+      const activeDisorder = disorders[activeDisorderIndex];
+      const primaryRisk = computeGeneRisk(activeDisorder, rVal, fVal, maleStatus, femaleStatus);
+      const pctRisk = (primaryRisk * 100).toFixed(2) + "%";
+
+      // Header & Top Bar updates
+      document.getElementById("headerCoupleName").textContent = `${maleName} & ${femaleName}`;
+      document.getElementById("metricR").innerHTML = `${rVal.toFixed(4)} <span class="text-xs font-normal text-slate-400">(${(rVal * 100).toFixed(2)}%)</span>`;
+      document.getElementById("metricF").innerHTML = `${fVal.toFixed(4)}`;
+      document.getElementById("metricRelLabel").textContent = basePreset.label + (extraLoop ? " (+Loop)" : "");
+      document.getElementById("metricRisk").textContent = pctRisk;
+      document.getElementById("metricGeneLabel").textContent = `Primary: ${activeDisorder.name}`;
+      document.getElementById("lcaBadge").textContent = basePreset.lca;
+
+      const badge = document.getElementById("headerRiskBadge");
+      if (primaryRisk >= 0.05 || fVal >= 0.0625) {
+        badge.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs uppercase tracking-wider shadow";
+        badge.textContent = "High Risk (Tier 3)";
+      } else if (fVal >= 0.0156 || primaryRisk >= 0.005) {
+        badge.className = "px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider shadow";
+        badge.textContent = "Elevated Risk (Tier 2)";
+      } else {
+        badge.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider shadow";
+        badge.textContent = "Standard Risk (Tier 1)";
+      }
+
+      // Math Trace Box
+      document.getElementById("mathTraceBox").innerHTML = `
+        <div>• Kinship Topology: ${basePreset.label}</div>
+        <div>• Shared Paths: ${basePreset.paths} | Steps: n₁=${basePreset.n1}, n₂=${basePreset.n2}</div>
+        <div>• Ancestral Loop (F_A): ${fa.toFixed(4)}</div>
+        <div>• Wright's R = ${rVal.toFixed(5)} (${(rVal * 100).toFixed(2)}%)</div>
+        <div class="text-teal-300 font-bold">• Offspring F = ½ × R = ${fVal.toFixed(5)}</div>
+        <div class="text-rose-300 font-bold">• ${activeDisorder.id} P(Affected) = ${pctRisk}</div>
+      `;
+
+      // SVG labels
+      document.getElementById("svgMaleName").textContent = maleName.split(" ")[0];
+      document.getElementById("svgFemaleName").textContent = femaleName.split(" ")[0];
+      document.getElementById("svgOffspringRisk").textContent = `F = ${fVal.toFixed(4)} | P(Affected) = ${pctRisk}`;
+
+      // Stage 3 Multi-Gene Table Render
+      const tbody = document.getElementById("carrierTableBody");
+      tbody.innerHTML = disorders.map((d, idx) => {
+        const rProb = computeGeneRisk(d, rVal, fVal, maleStatus, femaleStatus);
+        const fhChecked = document.getElementById(d.fhCheckbox).checked;
+        const isSelected = idx === activeDisorderIndex;
+        return `
+          <tr onclick="activeDisorderIndex=${idx}; syncAll();" class="cursor-pointer transition ${isSelected ? 'bg-teal-950/40 border-l-4 border-teal-400' : 'hover:bg-slate-900/60'}">
+            <td class="py-3 px-3"><input type="radio" name="geneRowRadio" ${isSelected ? 'checked' : ''} /></td>
+            <td class="py-3 px-3 font-bold text-white">${d.name} <span class="text-slate-500 font-normal">${d.omim}</span></td>
+            <td class="py-3 px-3 font-mono text-amber-300">${(d.freq * 100).toFixed(1)}%</td>
+            <td class="py-3 px-3">${fhChecked ? '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-semibold">Positive Family Hx</span>' : '<span class="text-slate-500">None Reported</span>'}</td>
+            <td class="py-3 px-3 font-mono font-bold ${rProb >= 0.05 ? 'text-rose-400' : 'text-emerald-400'}">${(rProb * 100).toFixed(2)}%</td>
+            <td class="py-3 px-3 text-teal-300 font-semibold">${d.action}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Stage 4 AI Counselor Copilot Dynamic Narrative Generation
+      renderCopilotNarrative(maleName, femaleName, basePreset.label, rVal, fVal, activeDisorder, pctRisk);
+
+      // Update HL7 FHIR R4 Bundle
+      const fhirBundle = {
+        resourceType: "Bundle",
+        id: "qaraba-care-fhir-r4-bundle",
+        type: "collection",
+        timestamp: new Date().toISOString(),
+        meta: { security: [{ system: "http://terminology.hl7.org/CodeSystem/v3-Confidentiality", code: "R", display: "Restricted Genomic Data" }] },
+        entry: [
+          {
+            resource: {
+              resourceType: "RiskAssessment",
+              status: "final",
+              subject: { display: `${maleName} & ${femaleName}` },
+              basis: [{ display: `Wright Relationship R=${rVal.toFixed(4)}, Offspring Inbreeding F=${fVal.toFixed(4)}` }],
+              prediction: [{ outcome: { text: activeDisorder.name }, probabilityDecimal: Number(primaryRisk.toFixed(5)) }],
+              note: [{ text: "Educational Risk Stratification — Requires Certified Genetic Counselor Review." }]
+            }
+          }
+        ]
+      };
+      document.getElementById("fhirJsonBox").textContent = JSON.stringify(fhirBundle, null, 2);
+    }
+
+    function renderCopilotNarrative(maleName, femaleName, relLabel, rVal, fVal, disorder, pctRisk) {
+      const tone = document.getElementById("copilotToneSelect").value;
+      const focus = document.getElementById("copilotFocusSelect").value;
+
+      let focusStepEn = "Schedule a Pre-implantation Genetic Testing for Monogenic Disorders (PGT-M / IVF) consultation so only unaffected embryos are transferred.";
+      let focusStepAr = "مناقشة خيار الفحص الوراثي للأجنة قبل الغرس (PGT-M) لضمان نقل الأجنة السليمة فقط.";
+      if (focus === "ngs") {
+        focusStepEn = "Order confirmatory high-depth Next-Generation Sequencing (NGS) and MLPA copy-number testing at an accredited molecular laboratory.";
+        focusStepAr = "إجراء الفحص الجيني التأكيدي المتقدم (NGS / MLPA) في مختبر جزيئي معتمد.";
+      } else if (focus === "prenatal") {
+        focusStepEn = "Review early prenatal diagnostic options (Chorionic Villus Sampling at 11–13 weeks or Amniocentesis) with a maternal-fetal medicine specialist.";
+        focusStepAr = "مراجعة خيارات التشخيص المبكر أثناء الحمل (فحص الزغابات المشيمية أو السائل الأمنيوسي) مع استشاري طب الأجنة.";
+      }
+
+      if (tone === "clinical") {
+        document.getElementById("aiOutputEnglish").innerHTML = `
+          <p><strong>Clinical Decision Support Summary:</strong> Couple <strong>${maleName}</strong> and <strong>${femaleName}</strong> present with a <strong>${relLabel}</strong> pedigree topology yielding Sewall Wright's Coefficient of Relationship <strong>R = ${rVal.toFixed(4)}</strong> and expected offspring autozygosity <strong>F = ${fVal.toFixed(4)}</strong>.</p>
+          <p><strong>Inheritance Stratification:</strong> For <strong>${disorder.name}</strong>, combined lineage and carrier inputs indicate an offspring autosomal recessive risk of <strong>${pctRisk}</strong> (and a 50% heterozygous carrier probability if both parents are confirmed carriers). <strong>Next Step:</strong> ${focusStepEn}</p>
+        `;
+      } else {
+        document.getElementById("aiOutputEnglish").innerHTML = `
+          <p><strong>Plain-Language Summary for ${maleName} &amp; ${femaleName}:</strong> Because your family tree shows a <strong>${relLabel}</strong> connection (shared ancestral factor <strong>F = ${fVal.toFixed(4)}</strong>), you share ${ (rVal * 100).toFixed(1) }% of your inherited family DNA. For <strong>${disorder.name}</strong>, our educational risk mapper estimates a <strong>${pctRisk}</strong> chance in each pregnancy that a child could inherit the condition.</p>
+          <p><strong>Tailored Preconception Plan:</strong><br>
+          1. <strong>Non-Stigmatizing Support:</strong> Being a carrier is completely natural—every human carries silent genetic variants.<br>
+          2. <strong>Actionable Prevention:</strong> ${focusStepEn}<br>
+          3. <strong>Specialist Referral:</strong> Connect with a certified genetic counselor below to turn this educational estimate into a formal medical care plan.</p>
+        `;
+      }
+
+      document.getElementById("aiOutputArabic").innerHTML = `
+        <p><strong>ملخص مبسط للشريكين (${maleName} و ${femaleName}):</strong> تُظهر شجرة العائلة وجود صلة قرابة من نوع <strong>${relLabel}</strong> بمعامل زواج أقارب (<strong>F = ${fVal.toFixed(4)}</strong>). بالنسبة لحالة <strong>${disorder.name}</strong>، فإن التقدير التعليمي لاحتمالية إصابة الطفل يبلغ <strong>${pctRisk}</strong> في كل حمل.</p>
+        <p><strong>خطوات التخطيط الإنجابي الموصى بها:</strong><br>
+        ١. ${focusStepAr}<br>
+        ٢. إحالة الملف المشفر إلى أخصائي مشورة وراثية معتمد لمراجعة النتائج سريرياً (هذا التقرير تثقيفي وليس تشخيصاً طبياً نهائياً).</p>
+      `;
+    }
+
+    function askCopilotCustomQuestion() {
+      syncAll();
+    }
+
+    function answerCustomQuestion() {
+      const q = document.getElementById("customCopilotQuestion").value.trim();
+      if (!q) return;
+      const box = document.getElementById("aiOutputEnglish");
+      box.innerHTML += `
+        <div class="mt-2 p-2.5 rounded-lg bg-teal-950/60 border border-teal-500/40 text-teal-200">
+          <strong><i class="fa-solid fa-comment-medical mr-1"></i> Copilot Q&amp;A ("${q}"):</strong> In autosomal recessive inheritance, carriers are healthy because one working gene copy compensates. When both partners carry a variant in the same gene, there is a 25% (1 in 4) chance per pregnancy that the child inherits both non-working copies, a 50% chance the child is a healthy carrier, and a 25% chance the child inherits neither variant. A certified genetic counselor can walk you through IVF with PGT-M to select healthy embryos prior to pregnancy.
+        </div>
+      `;
+      document.getElementById("customCopilotQuestion").value = "";
+    }
+
+    function bookCounselorReferral() {
+      const selectedClinic = document.querySelector('input[name="clinicReferral"]:checked').value;
+      const refId = "REF-UAE-" + Math.floor(100000 + Math.random() * 900000);
+      const confBox = document.getElementById("referralConfirmationBox");
+      confBox.classList.remove("hidden");
+      confBox.innerHTML = `
+        <div class="font-bold text-emerald-300"><i class="fa-solid fa-circle-check mr-1"></i> Encrypted Referral Packet Generated (${refId})</div>
+        <p>Target Facility: <strong>${selectedClinic}</strong></p>
+        <p class="text-[11px] text-emerald-300/80">Your HL7 FHIR R4 pedigree &amp; carrier stratification bundle has been queued for certified genetic counselor review under explicit patient consent.</p>
+      `;
+    }
+
+    function copyFhirJson() {
+      navigator.clipboard.writeText(document.getElementById("fhirJsonBox").textContent);
+      const btn = document.getElementById("copyBtn");
+      btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied!';
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fa-regular fa-copy mr-1"></i> Copy FHIR JSON';
+      }, 2000);
+    }
+
+    window.addEventListener("DOMContentLoaded", syncAll);
+  </script>
+</body>
+</html>
