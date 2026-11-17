@@ -59,7 +59,7 @@ qaraba-care/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR-USERNAME/qaraba-care.git
+git clone https://github.com/mohdkhallaf/qaraba-care.git
 cd qaraba-care
 ```
 
