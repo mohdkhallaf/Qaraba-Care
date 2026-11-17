@@ -36,6 +36,9 @@ Despite mandatory premarital screening programs in the UAE, Saudi Arabia, and Eg
 * **👩‍⚕️ Stage 4: Human-in-the-Loop Counselor Copilot & Cascade Screening**  
   Drafts bilingual consultation action plans (IVF with PGT-M, prenatal diagnostics, or anonymous tokenized cascade screening invites for unmarried siblings) requiring mandatory electronic sign-off by a licensed genetic counselor.
 
+## The Prototype Demo
+  https://mohdkhallaf.github.io/Qaraba-Care/
+
 ---
 
 ## 📂 Repository Structure
